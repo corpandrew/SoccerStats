@@ -1,9 +1,7 @@
 import com.google.gson.Gson;
-import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
-import parsing.Data;
-import parsing.Teams;
+import parsing.Seasons;
 import requests.HttpRequest;
 import requests.Parameters;
 
@@ -18,25 +16,12 @@ public class Main {
         params.put(Parameters.Parameter.SEASON, "17-18");
         params.put(Parameters.Parameter.TEAM, "liverpool");
 
-//        String response = HttpRequest.getResponse(HttpRequest.RequestType.SEASON_TEAMS_AVAILABLE, params).getBody().toString();
+//        Teams data = HttpRequest.getResponse(HttpRequest.RequestType.SEASON_TEAMS_AVAILABLE, params, Teams.class);
+//        data.getObjectsArrayList().forEach(e -> System.out.println(e.getName()));
 
-        Gson g = new Gson();
+        Seasons seasons = HttpRequest.getResponse(HttpRequest.RequestType.SEASONS_AVAILABLE, params, Seasons.class);
+        seasons.getSeasons().forEach(e -> System.out.println(e.getName()));
 
-
-        String response = HttpRequest.getResponse(HttpRequest.RequestType.SEASON_TEAMS_AVAILABLE, params).getBody().toString();
-
-        System.out.println(response);
-
-        Data data = g.fromJson(response, Data.class);
-
-//        System.out.println(response.getObjectsArrayList().get(0));
-
-//        data.getTeams().getObjectsArrayList().forEach(e -> System.out.println(e.getName()));
-        Teams teams = data.getTeams();
-        Teams.Team liverpool = teams.getObjectsArrayList().get(6);
-        String liverpoolWeb = liverpool.getTeamWebsite();
-
-        System.out.println(liverpoolWeb);
 
     }
 

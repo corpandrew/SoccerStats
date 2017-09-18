@@ -1,17 +1,17 @@
 package requests;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
+import com.google.gson.Gson;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sun.istack.internal.Nullable;
-
-import java.util.Map;
+import com.sun.org.apache.regexp.internal.RE;
+import parsing.Season;
+import parsing.Seasons;
 
 public class HttpRequest {
 
-    public static HttpResponse<JsonNode> getResponse(RequestType requestType, @Nullable Parameters params) {
-        String link = getLink(requestType);
+    public static String getResponse(RequestType requestType, @Nullable Parameters params) {
+        String link = requestType.getLink();
 
         if (params != null) {
             for (String s : params.keySet()) {
@@ -20,46 +20,34 @@ public class HttpRequest {
             }
         }
 
-        HttpResponse<JsonNode> response = null;
+        String response = null;
 
         try {
             response = Unirest.get(link)
                     .header("X-Mashape-Key", "HsdxelKE1Umsh9hfsJCCah13dZAyp1YOiuijsngzYPEUBNAZvB")
                     .header("Accept", "application/json")
-                    .asJson();
+                    .asJson().getBody().toString().replace("{\"data\":", "");//fix formatting for parsing
         } catch (UnirestException e) {
             e.printStackTrace();
         }
 
-        return response;
+        assert response != null;
+
+        return response.substring(0, response.length()-1);
     }
 
-    public static <T> HttpResponse<T> getResponseAsT(RequestType requestType, @Nullable Parameters params, Class<T> className) {
-        String link = getLink(requestType);
-
-        if (params != null) {
-            for (String s : params.keySet()) {
-                if (s.contains(s))
-                    link = link.replace(s, params.get(s));
-            }
-        }
-
-        HttpResponse<T> response = null;
-
-        try {
-            response = Unirest.get(link)
-                    .header("X-Mashape-Key", "HsdxelKE1Umsh9hfsJCCah13dZAyp1YOiuijsngzYPEUBNAZvB")
-                    .header("Accept", "application/json")
-                    .asObject(className);
-        } catch (UnirestException e) {
-            e.printStackTrace();
-        }
-
-        return response;
-    }
-
-    public static HttpResponse<JsonNode> getResponse(RequestType requestType) {
+    public static String getResponse(RequestType requestType) {
         return getResponse(requestType, null);
+    }
+
+    public static <T> T getResponse(RequestType requestType, @Nullable Parameters params, Class<T> className) {
+        String response = getResponse(requestType, params);
+
+        System.out.println(response);
+
+        Gson g = new Gson();
+
+        return g.fromJson(response, className);
     }
 
     private static String getLink(RequestType requestType) {
@@ -116,13 +104,45 @@ public class HttpRequest {
     }
 
     public enum RequestType {
-        LEAGUE_DETAILS/*("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug")*/,
-        LEAGUE_MANAGERS_IN_A_SEASON(), LEAGUE_REFEREE_IN_SEASON,
-        LEAGUE_TOP_SCORER, LIST_OF_LEAGUES, ROUND_MATCHES, ROUND_SPECIFIED_MATCH,
-        SEASON_DETAILS, SEASON_HEAD_2_HEAD, SEASON_MATCHES_FOR_A_TEAM, SEASON_ROUNDS,
-        SEASON_SPECIFIED_ROUND, SEASON_STANDINGS, SEASON_STANDINGS_POSITION,
-        SEASON_TEAMS_AVAILABLE, SEASON_TEAMS_AVAILABLE_PLAYERS, SEASONS_AVAILABLE,
-        STADIUMS_LIST, EVENTS_LIST;
+        LEAGUE_DETAILS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug", Seasons.class),
+        LEAGUE_MANAGERS_IN_A_SEASON("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/managers"),
+        LEAGUE_REFEREE_IN_SEASON("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/referees"),
+        LEAGUE_TOP_SCORER("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/topscorers"),
+        LIST_OF_LEAGUES("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues"),
+        ROUND_MATCHES("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug/matches"),
+        ROUND_SPECIFIED_MATCH("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug/matches/match_slug"),
+        SEASON_DETAILS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug"),
+        SEASON_HEAD_2_HEAD("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds?team_1_slug=team_1&team_2_slug=team_2"),
+        SEASON_MATCHES_FOR_A_TEAM("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds?team_identifier=team_identifier"),
+        SEASON_ROUNDS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds"),
+        SEASON_SPECIFIED_ROUND("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug"),
+        SEASON_STANDINGS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/standings"),
+        SEASON_STANDINGS_POSITION("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/standings/position"),
+        SEASON_TEAMS_AVAILABLE("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/teams"),
+        SEASON_TEAMS_AVAILABLE_PLAYERS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/teams/team_slug/players"),
+        SEASONS_AVAILABLE("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons"),
+        STADIUMS_LIST("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/stadiums"),
+        EVENTS_LIST("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/utils/events");
+
+        private String link;
+        private Class className;
+
+        RequestType(String link, Class className) {
+            this.link = link;
+            this.className = className;
+        }
+
+        RequestType(String link) {
+            this.link = link;
+        }
+
+        public String getLink() {
+            return link;
+        }
+
+        public Class getClassName() {
+            return className;
+        }
     }
 
 }

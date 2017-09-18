@@ -2,13 +2,13 @@ package parsing;
 
 import java.util.ArrayList;
 
-public class Teams {
+public class Seasons {
 
     private String statusReason;
     private String errorCode;
     private String statusCode;
 
-    private ArrayList<Team> teams;
+    private ArrayList<Season> seasons;
 
     public String getStatusReason() {
         return statusReason;
@@ -22,8 +22,7 @@ public class Teams {
         return statusCode;
     }
 
-    public ArrayList<Team> getTeams() {
-        return teams;
+    public ArrayList<Season> getSeasons() {
+        return seasons;
     }
-
 }
