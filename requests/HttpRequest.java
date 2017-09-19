@@ -4,9 +4,7 @@ import com.google.gson.Gson;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sun.istack.internal.Nullable;
-import com.sun.org.apache.regexp.internal.RE;
-import parsing.Season;
-import parsing.Seasons;
+import parsing.*;
 
 public class HttpRequest {
 
@@ -33,7 +31,31 @@ public class HttpRequest {
 
         assert response != null;
 
-        return response.substring(0, response.length()-1);
+        return response.substring(0, response.length() - 1);
+    }
+
+    public static String getResponseAsString(RequestType requestType, Parameters params) {
+        String link = requestType.getLink();
+
+        if (params != null) {
+            for (String s : params.keySet()) {
+                if (s.contains(s))
+                    link = link.replace(s, params.get(s));
+            }
+        }
+
+        String response = null;
+
+        try {
+            response = Unirest.get(link)
+                    .header("X-Mashape-Key", "HsdxelKE1Umsh9hfsJCCah13dZAyp1YOiuijsngzYPEUBNAZvB")
+                    .header("Accept", "application/json")
+                    .asJson().getBody().toString();
+        } catch (UnirestException e) {
+            e.printStackTrace();
+        }
+
+        return response;
     }
 
     public static String getResponse(RequestType requestType) {
@@ -48,6 +70,18 @@ public class HttpRequest {
         Gson g = new Gson();
 
         return g.fromJson(response, className);
+    }
+
+    public static <T> T getResponseAs(RequestType requestType, @Nullable Parameters params) {
+        String response = getResponse(requestType, params);
+
+        Class<T> classname = requestType.getClassName();
+
+        System.out.println(response);
+
+        Gson g = new Gson();
+
+        return g.fromJson(response, classname);
     }
 
     private static String getLink(RequestType requestType) {
@@ -104,19 +138,19 @@ public class HttpRequest {
     }
 
     public enum RequestType {
-        LEAGUE_DETAILS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug", Seasons.class),
-        LEAGUE_MANAGERS_IN_A_SEASON("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/managers"),
-        LEAGUE_REFEREE_IN_SEASON("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/referees"),
-        LEAGUE_TOP_SCORER("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/topscorers"),
-        LIST_OF_LEAGUES("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues"),
-        ROUND_MATCHES("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug/matches"),
-        ROUND_SPECIFIED_MATCH("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug/matches/match_slug"),
-        SEASON_DETAILS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug"),
-        SEASON_HEAD_2_HEAD("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds?team_1_slug=team_1&team_2_slug=team_2"),
-        SEASON_MATCHES_FOR_A_TEAM("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds?team_identifier=team_identifier"),
-        SEASON_ROUNDS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds"),
-        SEASON_SPECIFIED_ROUND("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug"),
-        SEASON_STANDINGS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/standings"),
+        LEAGUE_DETAILS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug", Seasons.class),//league slug
+        LEAGUE_MANAGERS_IN_A_SEASON("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/managers", Managers.class),//league slug, season slug
+        LEAGUE_REFEREE_IN_SEASON("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/referees", Referees.class),//league slug, season slug
+        LEAGUE_TOP_SCORER("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/topscorers", TopScorers.class),
+        LIST_OF_LEAGUES("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues", Leagues.class),
+        ROUND_MATCHES("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug/matches", Matches.class),
+        ROUND_SPECIFIED_MATCH("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug/matches/match_slug", RoundSpecificMatches.class),
+        SEASON_DETAILS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug", Standing.class),
+        SEASON_HEAD_2_HEAD("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds?team_1_slug=team_1&team_2_slug=team_2", SeasonHead2Head.class),
+        SEASON_MATCHES_FOR_A_TEAM("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds?team_identifier=team_identifier", SeasonHead2Head.class),
+        SEASON_ROUNDS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds", SeasonHead2Head.class),
+        SEASON_SPECIFIED_ROUND("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/rounds/round_slug", SeasonSpecifiedRounds.class),
+        SEASON_STANDINGS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/standings", SeasonLeagueStandings.class),
         SEASON_STANDINGS_POSITION("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/standings/position"),
         SEASON_TEAMS_AVAILABLE("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/teams"),
         SEASON_TEAMS_AVAILABLE_PLAYERS("https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/leagues/league_slug/seasons/season_slug/teams/team_slug/players"),

@@ -2,18 +2,18 @@ package parsing;
 
 import java.util.ArrayList;
 
-public class Seasons extends BaseRequest{
+public class Leagues extends BaseRequest {
 
-    private ArrayList<Season> seasons;
+    private ArrayList<League> leagues;
 
-    public ArrayList<Season> getSeasons() {
-        return seasons;
+    public ArrayList<League> getLeagues() {
+        return leagues;
     }
 
     @Override
     public String toString() {
-        return "Seasons{" +
-                "seasons=" + seasons +
+        return "Leagues{" +
+                "leagues=" + leagues +
                 ", statusReason='" + statusReason + '\'' +
                 ", errorCode='" + errorCode + '\'' +
                 ", statusCode='" + statusCode + '\'' +

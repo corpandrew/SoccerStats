@@ -14,11 +14,11 @@ public class Season {
         return identifier;
     }
 
-    public String getSeason_slug() {
+    public String getSeasonSlug() {
         return season_slug;
     }
 
-    public String getSeason_start() {
+    public String getSeasonStart() {
         return season_start;
     }
 
@@ -26,11 +26,23 @@ public class Season {
         return name;
     }
 
-    public String getLeague_identifier() {
+    public String getLeagueIdentifier() {
         return league_identifier;
     }
 
-    public String getSeason_end() {
+    public String getSeasonEnd() {
         return season_end;
+    }
+
+    @Override
+    public String toString() {
+        return "Season{" +
+                "identifier='" + identifier + '\'' +
+                ", season_slug='" + season_slug + '\'' +
+                ", season_start='" + season_start + '\'' +
+                ", name='" + name + '\'' +
+                ", league_identifier='" + league_identifier + '\'' +
+                ", season_end='" + season_end + '\'' +
+                '}';
     }
 }

@@ -2,18 +2,17 @@ package parsing;
 
 import java.util.ArrayList;
 
-public class Seasons extends BaseRequest{
+public class SeasonSpecifiedRounds extends BaseRequest{
+    private ArrayList<SeasonSpecifiedRound> rounds;
 
-    private ArrayList<Season> seasons;
-
-    public ArrayList<Season> getSeasons() {
-        return seasons;
+    public ArrayList<SeasonSpecifiedRound> getRounds() {
+        return rounds;
     }
 
     @Override
     public String toString() {
-        return "Seasons{" +
-                "seasons=" + seasons +
+        return "SeasonSpecifiedRounds{" +
+                "rounds=" + rounds +
                 ", statusReason='" + statusReason + '\'' +
                 ", errorCode='" + errorCode + '\'' +
                 ", statusCode='" + statusCode + '\'' +
