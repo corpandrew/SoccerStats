@@ -1,27 +1,34 @@
 import com.google.gson.Gson;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
-import parsing.Standing;
-import requests.HttpRequest;
-import requests.Parameters;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.HttpClients;
 
 public class Main {
 
     public static void main(String... args) {
 
         setupUnirest();
-
-        Parameters params = new Parameters();
-        params.put(Parameters.Parameter.LEAGUE, "serie-a");
-        params.put(Parameters.Parameter.SEASON, "17-18");
-        params.put(Parameters.Parameter.TEAM, "juventus");
-
-        Standing serieStanding = HttpRequest.getResponseAs(HttpRequest.RequestType.SEASON_DETAILS, params);
-        serieStanding.getStandings().forEach(System.out::println);
+//
+//        Parameters params = new Parameters();
+//        params.put(Parameter.LEAGUE, "serie-a");
+//        params.put(Parameter.SEASON, "17-18");
+//        params.put(Parameter.TEAM, "juventus");
+//
+//        Standing serieStanding = HttpRequest.getResponseAs(HttpRequest.RequestType.SEASON_DETAILS, params);
+//        serieStanding.getStandings().forEach(System.out::println);
 
     }
 
     private static void setupUnirest() {
+        RequestConfig globalConfig = RequestConfig.custom()
+                .setCookieSpec(CookieSpecs.STANDARD).build();
+
+        HttpClient httpclient = HttpClients.custom().setDefaultRequestConfig(globalConfig).build();
+        Unirest.setHttpClient(httpclient);
+
         Unirest.setObjectMapper(new ObjectMapper() {
             private Gson gson = new Gson();
 
