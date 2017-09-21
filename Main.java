@@ -1,14 +1,20 @@
+import com.corpa.parsing.Match;
+import com.corpa.parsing.Matches;
+import com.corpa.parsing.Round;
+import com.corpa.parsing.SeasonHead2Head;
+import com.corpa.requests.HttpRequest;
 import com.google.gson.Gson;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClients;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 public class Main {
 
-    public static void main(String... args) {
+    public static void main(String... args) throws ParseException {
 
         setupUnirest();
 //
@@ -20,15 +26,40 @@ public class Main {
 //        Standing serieStanding = HttpRequest.getResponseAs(HttpRequest.RequestType.SEASON_DETAILS, params);
 //        serieStanding.getStandings().forEach(System.out::println);
 
+
+        SeasonHead2Head seasonHead2Head = HttpRequest.getSeasonRounds("serie-a", "17-18");
+        ArrayList<Round> rounds = seasonHead2Head.getRounds();
+
+        ArrayList<Match> matchesThisSeason = new ArrayList<>();
+
+
+        ArrayList<Round> roundsThatHaveHappened = new ArrayList<>();
+        Calendar currentTime = Calendar.getInstance();
+        Calendar roundTime = Calendar.getInstance();
+
+        for (Round r : rounds) {
+            roundTime.setTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(r.getEnd_date()));
+
+            if (roundTime.before(currentTime))
+                roundsThatHaveHappened.add(r);
+            else
+                break;
+        }
+        try {
+            for (Round r : roundsThatHaveHappened) {
+                Matches matches = HttpRequest.getRoundMatches("serie-a", r.getRound_slug(), "17-18");
+                System.out.println(matches);
+                matchesThisSeason.addAll(matches.getMatches());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        matchesThisSeason.forEach(e -> {
+            System.out.println("Score between: " + e.getHome().getTeam() + " and " + e.getAway().getTeam() + " was " + e.getMatch_result());
+        });
     }
 
     private static void setupUnirest() {
-        RequestConfig globalConfig = RequestConfig.custom()
-                .setCookieSpec(CookieSpecs.STANDARD).build();
-
-        HttpClient httpclient = HttpClients.custom().setDefaultRequestConfig(globalConfig).build();
-        Unirest.setHttpClient(httpclient);
-
         Unirest.setObjectMapper(new ObjectMapper() {
             private Gson gson = new Gson();
 
